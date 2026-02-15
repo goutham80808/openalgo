@@ -1,0 +1,49 @@
+
+================================================================================
+BACKTEST RESULTS SUMMARY
+================================================================================
+
+PERFORMANCE METRICS
+-------------------
+Total Trades:          359
+Wins:                 96 (26.7%)
+Losses:               263
+Average Win:          5.31R
+Average Loss:         -0.99R
+Expectancy:           0.696R per trade
+Max Drawdown:        5.7%
+Sharpe Ratio:        3.20
+Total P&L:            Rs.33,087.60
+Return:               66.2%
+
+STRATEGY DETAILS
+----------------
+Stocks:               21
+Timeframe:            60min
+Entry Conditions:
+  - Price near 20-50 day highs
+  - Volatility percentile < 20%
+  - Range compression
+  - Volume contraction
+  - Breakout with 150% avg volume
+  - Market breadth bullish
+
+Exit Logic:
+  - Initial Stop: 1% or 1 ATR
+  - +2R: 50% partial, stop to breakeven
+  - +3R: Trail to 2 ATR
+  - +4R: Add position (pyramid)
+  - Time stop: 10 bars
+
+OUTPUT FILES
+------------
+1. equity_curve.html
+2. drawdown_analysis.html
+3. r_multiple_distribution.html
+4. win_loss_by_symbol.html
+5. rolling_sharpe.html
+6. monthly_returns.html
+7. market_regime_analysis.html
+8. trade_log.csv
+
+================================================================================
