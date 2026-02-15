@@ -17,7 +17,7 @@ from openalgo import api, ta
 from plotly.subplots import make_subplots
 
 # ───────────────────────── CONFIG ─────────────────────────
-API_KEY = "dfae8e3a1ce08f60754b0d3597553d7c14957542104b431e4b881c089864a35e"
+API_KEY = "e0f374f2f7ec58fd6676e7f133bb3ecb3bb06b138dab3d61f33a5354115a6df2"
 API_HOST = "http://127.0.0.1:5000"
 
 SYMBOL = "SBIN"
