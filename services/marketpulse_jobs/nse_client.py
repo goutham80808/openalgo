@@ -146,6 +146,34 @@ def fetch_corporate_actions(symbol: str, from_date: str, to_date: str) -> pd.Dat
         raise
 
 
+CORPORATE_ACTIONS_URL = (
+    "https://www.nseindia.com/api/corporates-corporateActions"
+    "?index=equities&from_date={from_date}&to_date={to_date}"
+)
+
+
+def fetch_corporate_actions_calendar(from_date: str, to_date: str) -> list[dict]:
+    """Market-wide NSE corporate-actions calendar between two ISO dates.
+
+    nsefetch performs NSE's cookie warm-up internally. Returns the raw row
+    dicts (symbol, series, exDate, subject, ...).
+    """
+    _paced()
+    try:
+        import json
+
+        import nsepython
+
+        payload = nsepython.nsefetch(
+            CORPORATE_ACTIONS_URL.format(from_date=_ddmmyyyy(from_date), to_date=_ddmmyyyy(to_date))
+        )
+        rows = json.loads(payload) if isinstance(payload, str) else payload
+        return rows or []
+    except Exception:
+        logger.exception(f"corporate actions calendar fetch failed for {from_date}..{to_date}")
+        raise
+
+
 def fetch_fno_lot_sizes() -> dict[str, int]:
     """Symbol -> current F&O lot size, for every F&O underlying."""
     _paced()

@@ -51,9 +51,10 @@ def main() -> int:
         rows = conn.execute(
             """
             SELECT symbol, exchange,
-                   COUNT(DISTINCT CAST(timestamp AS DATE)) AS days
+                   COUNT(DISTINCT CAST(to_timestamp(timestamp + 19800) AS DATE)) AS days
             FROM market_data
-            WHERE interval = 'D' AND CAST(timestamp AS DATE) >= ?
+            WHERE interval = 'D'
+              AND CAST(to_timestamp(timestamp + 19800) AS DATE) >= ?
             GROUP BY symbol, exchange
             """,
             [earliest],
