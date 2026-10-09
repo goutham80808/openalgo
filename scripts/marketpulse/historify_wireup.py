@@ -142,9 +142,9 @@ def backfill(members: list[dict], months: int, api_key: str) -> None:
 
 def _api_key() -> str | None:
     try:
-        from database.auth_db import get_api_key_for_tradingview
+        from database.auth_db import get_first_available_api_key
 
-        return get_api_key_for_tradingview("admin")
+        return get_first_available_api_key()
     except Exception:
         logger.exception("could not read an API key for backfill")
         return None
