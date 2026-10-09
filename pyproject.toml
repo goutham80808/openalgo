@@ -167,6 +167,8 @@ dependencies = [
   "agno==3.0.5",
   "ddgs>=9.16.0",
   "nsepython>=2.101",
+  "xlrd>=2.0.2",
+  "openpyxl>=3.1.5",
 ]
 
 [build-system]
