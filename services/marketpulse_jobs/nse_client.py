@@ -73,7 +73,9 @@ def fetch_nse_bhavcopy_with_delivery(date: str) -> pd.DataFrame:
             timeout=30,
         )
         response.raise_for_status()
-        frame = pd.read_csv(io.StringIO(response.text))
+        # skipinitialspace: the archives files pad both headers and values
+        # with spaces (" EQ"), which would defeat exact comparisons.
+        frame = pd.read_csv(io.StringIO(response.text), skipinitialspace=True)
     except Exception:
         logger.exception(f"NSE bhavcopy fetch failed for {date}")
         raise
@@ -142,3 +144,39 @@ def fetch_corporate_actions(symbol: str, from_date: str, to_date: str) -> pd.Dat
     except Exception:
         logger.exception(f"corporate actions fetch failed for {symbol}")
         raise
+
+
+def fetch_fno_lot_sizes() -> dict[str, int]:
+    """Symbol -> current F&O lot size, for every F&O underlying."""
+    _paced()
+    try:
+        import nsepython
+
+        return dict(nsepython.nse_get_fno_lot_sizes(symbol="all", mode="list"))
+    except Exception:
+        logger.exception("F&O lot size fetch failed")
+        raise
+
+
+INDEX_CONSTITUENTS_URL = "https://nsearchives.nseindia.com/content/indices/{slug}"
+# index_member means "part of a headline NSE index"; NIFTY 500 is the
+# superset that matters for liquidity screens, NIFTY 50 the core.
+INDEX_CONSTITUENT_SLUGS = ("ind_nifty50list.csv", "ind_nifty500list.csv")
+
+
+def fetch_index_constituents(slug: str) -> pd.DataFrame:
+    """Constituents of one NSE index (columns include Symbol and ISIN Code)."""
+    _paced()
+    try:
+        response = get_httpx_client().get(
+            INDEX_CONSTITUENTS_URL.format(slug=slug),
+            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"},
+            timeout=30,
+        )
+        response.raise_for_status()
+        frame = pd.read_csv(io.StringIO(response.text), skipinitialspace=True)
+    except Exception:
+        logger.exception(f"index constituents fetch failed for {slug}")
+        raise
+    frame.columns = [str(c).strip() for c in frame.columns]
+    return frame
