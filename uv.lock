@@ -2836,6 +2836,21 @@ wheels = [
 ]
 
 [[package]]
+name = "nsepython"
+version = "2.101"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "curl-cffi" },
+    { name = "pandas" },
+    { name = "requests" },
+    { name = "scipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/bb/b5/357213e85516038e3f4829616232b0786bf31f6c788fe8d1e85a668e4ab0/nsepython-2.101.tar.gz", hash = "sha256:8256289741029074378d2bde10b0396a101ffd6b8d283ff6ede28ff79a235cc2", size = 53538, upload-time = "2026-10-07T20:08:37.032Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/31/75/c4ade2b72c5a6f7546e178287dad913d8bb9ef6146c233ae499abc5d37cf/nsepython-2.101-py3-none-any.whl", hash = "sha256:0e68d96b55f527acf54cccd5a3ba9ab5e979094cb1f0c2fc0740810248b6f6f8", size = 51526, upload-time = "2026-10-07T20:08:35.36Z" },
+]
+
+[[package]]
 name = "numpy"
 version = "2.4.4"
 source = { registry = "https://pypi.org/simple" }
@@ -3018,6 +3033,7 @@ dependencies = [
     { name = "narwhals" },
     { name = "nbformat" },
     { name = "nest-asyncio" },
+    { name = "nsepython" },
     { name = "numpy" },
     { name = "openalgo" },
     { name = "opengreeks" },
@@ -3194,6 +3210,7 @@ requires-dist = [
     { name = "narwhals", specifier = "==2.25.0" },
     { name = "nbformat", specifier = "==5.11.1" },
     { name = "nest-asyncio", specifier = "==1.6.0" },
+    { name = "nsepython", specifier = ">=2.101" },
     { name = "numpy", specifier = "==2.4.4" },
     { name = "openalgo", specifier = "==2.0.5" },
     { name = "opengreeks", specifier = ">=0.2.0" },
