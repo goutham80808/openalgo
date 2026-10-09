@@ -169,3 +169,10 @@ ddgs>=9.16.0
 # greenlet>=1.0 with no upper bound.
 gunicorn>=25.0,<26
 eventlet==0.41.2
+
+# Market Pulse (docs/superpowers/specs/2026-10-09-marketpulse-design.md):
+# NSE public-file fetching, plus the Excel readers for the AMFI
+# classification workbook (.xlsx via openpyxl, .xls via xlrd).
+nsepython==2.101
+openpyxl==3.1.5
+xlrd==2.0.2

@@ -160,3 +160,10 @@ openscript==0.8.1
 litellm==1.104.0
 agno==3.0.5
 ddgs>=9.16.0
+
+# Market Pulse (docs/superpowers/specs/2026-10-09-marketpulse-design.md):
+# NSE public-file fetching, plus the Excel readers for the AMFI
+# classification workbook (.xlsx via openpyxl, .xls via xlrd).
+nsepython==2.101
+openpyxl==3.1.5
+xlrd==2.0.2
