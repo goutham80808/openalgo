@@ -97,7 +97,47 @@ def ensure_schedule(dry_run: bool) -> None:
         logger.info(f"schedule: {msg}")
 
 
+def _expected_sessions(start: dt.date, end: dt.date) -> int:
+    from utils.trading_calendar import is_trading_day
+
+    count = 0
+    day = start
+    while day <= end:
+        if is_trading_day(day):
+            count += 1
+        day += dt.timedelta(days=1)
+    return count
+
+
+def _stored_dates(duck, symbol: str, exchange: str, since: dt.date) -> set[dt.date]:
+    """Daily session dates already in DuckDB for this symbol."""
+    rows = duck.execute(
+        """
+        SELECT DISTINCT CAST(to_timestamp(timestamp + 19800) AS DATE)
+        FROM market_data
+        WHERE symbol = ? AND exchange = ? AND interval = 'D'
+          AND CAST(to_timestamp(timestamp + 19800) AS DATE) >= ?
+        """,
+        [symbol, exchange, since],
+    ).fetchall()
+    return {row[0] for row in rows}
+
+
+def _missing_windows(
+    have: set[dt.date], spans: list[tuple[dt.date, dt.date, int]]
+) -> list[tuple[dt.date, dt.date]]:
+    """Windows whose trading sessions are not all stored yet (resume points)."""
+    out = []
+    for start, end, expected in spans:
+        if sum(1 for day in have if start <= day <= end) < expected:
+            out.append((start, end))
+    return out
+
+
 def backfill(members: list[dict], months: int, api_key: str) -> None:
+    import duckdb
+
+    from database.historify_db import get_db_path
     from services.historify_service import download_data
 
     end = dt.date.today()
@@ -106,20 +146,31 @@ def backfill(members: list[dict], months: int, api_key: str) -> None:
     cursor = start
     while cursor < end:
         window_end = min(cursor + dt.timedelta(days=BACKFILL_STEP_DAYS), end)
-        windows.append((cursor.isoformat(), window_end.isoformat()))
+        windows.append((cursor, window_end))
         cursor = window_end + dt.timedelta(days=1)
+    spans = [(s, e, _expected_sessions(s, e)) for s, e in windows]
 
     failures = []
+    skipped = 0
     t0 = time.monotonic()
     for index, member in enumerate(members):
-        for window_start, window_end in windows:
+        # Open per symbol and close at once: a connection held for the whole
+        # backfill would block the running app's mp-eod write on the same file.
+        duck = duckdb.connect(get_db_path())
+        try:
+            have = _stored_dates(duck, member["symbol"], member["exchange"], windows[0][0])
+        finally:
+            duck.close()
+        todo = _missing_windows(have, spans)
+        skipped += len(spans) - len(todo)
+        for window_start, window_end in todo:
             try:
                 success, response, _ = download_data(
                     symbol=member["symbol"],
                     exchange=member["exchange"],
                     interval="D",
-                    start_date=window_start,
-                    end_date=window_end,
+                    start_date=window_start.isoformat(),
+                    end_date=window_end.isoformat(),
                     api_key=api_key,
                 )
                 if not success:
@@ -132,11 +183,11 @@ def backfill(members: list[dict], months: int, api_key: str) -> None:
             elapsed = time.monotonic() - t0
             logger.info(
                 f"backfill progress: {index + 1}/{len(members)} symbols, "
-                f"{len(failures)} failures, {elapsed:.0f}s elapsed"
+                f"{len(failures)} failures, {skipped} windows skipped, {elapsed:.0f}s elapsed"
             )
     logger.info(
         f"backfill complete: {len(members)} symbols x {len(windows)} windows, "
-        f"{len(failures)} failures in {time.monotonic() - t0:.0f}s"
+        f"{skipped} already covered, {len(failures)} failures in {time.monotonic() - t0:.0f}s"
     )
 
 
